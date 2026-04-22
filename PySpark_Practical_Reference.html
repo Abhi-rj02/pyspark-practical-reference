@@ -1,0 +1,2389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<!-- SEO fundamentals -->
+<title>PySpark Field Guide — Complete Reference for Data Engineers | Abhishek Raj</title>
+<meta name="description" content="A hands-on PySpark reference covering 30 topics from cluster architecture to end-to-end pipelines — with worked examples, production tips, and SQL-to-PySpark translations. Built for data engineers." />
+<meta name="author" content="Abhishek Raj" />
+<meta name="keywords" content="PySpark, Apache Spark, PySpark tutorial, PySpark cheat sheet, PySpark DataFrame, Spark SQL, RDD, PySpark for data engineers, PySpark reference, PySpark examples, PySpark joins, PySpark UDF, PySpark aggregations, broadcast join, Databricks PySpark, data engineering" />
+<meta name="robots" content="index, follow" />
+
+<!-- Open Graph (Facebook, LinkedIn, Slack link previews) -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="PySpark Field Guide — Complete Reference for Data Engineers" />
+<meta property="og:description" content="30 sections from cluster basics to production pipelines. Worked examples, SQL bridges, scenarios, and tips — built for engineers coming from SQL." />
+<meta property="og:site_name" content="PySpark Field Guide" />
+<meta property="og:locale" content="en_US" />
+<meta property="article:author" content="Abhishek Raj" />
+<meta property="article:published_time" content="2026-04-22" />
+<meta property="article:section" content="Data Engineering" />
+<meta property="article:tag" content="PySpark" />
+<meta property="article:tag" content="Apache Spark" />
+<meta property="article:tag" content="Data Engineering" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="PySpark Field Guide — Complete Reference for Data Engineers" />
+<meta name="twitter:description" content="30 sections · 11 worked examples · SQL bridges, production tips, and real-world scenarios. A hands-on PySpark reference." />
+
+<!-- Structured Data (JSON-LD) — helps Google understand the page -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "PySpark Field Guide — Complete Reference for Data Engineers",
+  "description": "A hands-on PySpark reference covering 30 topics from cluster architecture to end-to-end pipelines, with worked examples and production tips.",
+  "author": {
+    "@type": "Person",
+    "name": "Abhishek Raj",
+    "email": "pr.abhishekraj@gmail.com"
+  },
+  "datePublished": "2026-04-22",
+  "dateModified": "2026-04-22",
+  "inLanguage": "en",
+  "about": [
+    { "@type": "Thing", "name": "PySpark" },
+    { "@type": "Thing", "name": "Apache Spark" },
+    { "@type": "Thing", "name": "Data Engineering" }
+  ],
+  "proficiencyLevel": "Intermediate",
+  "articleSection": ["Foundations", "DataFrames", "Operations & Schemas", "PySpark in Python", "PySpark SQL & RDDs"]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Backgrounds */
+    --bg-page:        #f8f9fb;
+    --bg-surface:     #ffffff;
+    --bg-code:        #f6f8fc;
+    --bg-callout:     #f1f5f9;
+    
+    /* Text / Ink */
+    --ink-main:       #0f172a;
+    --ink-muted:      #475569;
+    --ink-faint:      #94a3b8;
+    
+    /* Borders */
+    --rule-light:     #f1f5f9;
+    --rule-med:       #e2e8f0;
+    --rule-dark:      #cbd5e1;
+
+    /* Accents */
+    --accent:         #2563eb;
+    --accent-hover:   #1d4ed8;
+    --accent-bg:      #eff6ff;
+    --accent-faint:   #dbeafe;
+
+    /* Syntax */
+    --keyword:  #c678dd;
+    --string:   #10b981;
+    --comment:  #94a3b8;
+    --func:     #3b82f6;
+    --class-c:  #eab308;
+    --number:   #f97316;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--ink-main);
+    font-family: "Manrope", system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* subtle grain texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- layout ---------- */
+  .layout {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 80px 40px 160px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 100px;
+  }
+
+  /* ---------- masthead ---------- */
+  header.masthead {
+    grid-column: 1 / -1;
+    margin-bottom: 64px;
+    padding-bottom: 48px;
+    border-bottom: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+    position: relative;
+  }
+  header.masthead::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-faint) 40%, var(--rule-med) 70%, transparent);
+    border-radius: 1px;
+  }
+  .masthead .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .masthead h1 {
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin: 0;
+    color: var(--ink-main);
+  }
+  .masthead h1 .accent-word {
+    color: var(--accent);
+    position: relative;
+  }
+  /* subtle underline accent on the hero word */
+  .masthead h1 .accent-word::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--accent-faint);
+    border-radius: 3px;
+    z-index: -1;
+  }
+  .masthead .subtitle {
+    margin-top: 24px;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink-muted);
+    max-width: 56ch;
+    line-height: 1.6;
+  }
+  .masthead .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    padding: 12px 24px;
+    background: var(--ink-main);
+    color: #ffffff;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .masthead .cta-pill:hover {
+    transform: translateY(-2px);
+    background: var(--accent);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
+  }
+  .masthead .cta-pill::after {
+    content: "↓";
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .masthead .cta-pill:hover::after {
+    transform: translateY(2px);
+  }
+  .masthead .meta {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+    background: var(--bg-surface);
+    border: 1px solid var(--rule-med);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .masthead .meta .edition { color: var(--ink-main); font-weight: 600; }
+
+  /* ---------- TOC ---------- */
+  nav.toc {
+    position: sticky;
+    top: 40px;
+    align-self: start;
+    font-size: 14px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-dark) transparent;
+  }
+  nav.toc::-webkit-scrollbar { width: 4px; }
+  nav.toc::-webkit-scrollbar-track { background: transparent; }
+  nav.toc::-webkit-scrollbar-thumb { background: var(--rule-dark); border-radius: 2px; }
+  nav.toc::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+  nav.toc .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  nav.toc .toc-part {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-main);
+    margin: 32px 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  nav.toc .toc-part:first-of-type { margin-top: 0; }
+  nav.toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: toc;
+    border-left: 1px solid var(--rule-med);
+  }
+  nav.toc ol[start="6"]  { counter-reset: toc 5; }
+  nav.toc ol[start="11"] { counter-reset: toc 10; }
+  nav.toc ol[start="16"] { counter-reset: toc 15; }
+  nav.toc li {
+    counter-increment: toc;
+    position: relative;
+  }
+  nav.toc a {
+    display: flex;
+    padding: 6px 0 6px 16px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.4;
+    font-weight: 500;
+    border-radius: 0 6px 6px 0;
+  }
+  nav.toc a:hover { 
+    color: var(--accent); 
+    background-color: var(--accent-bg);
+  }
+  nav.toc a::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: transparent;
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  nav.toc a:hover::before {
+    background-color: var(--accent);
+  }
+
+  /* ---------- main ---------- */
+  main { min-width: 0; }
+
+  /* part divider */
+  .part-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 80px;
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 700;
+  }
+  .part-banner .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--accent-faint);
+  }
+  .part-banner .name { color: var(--ink-main); }
+  .part-banner .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--rule-med), transparent);
+  }
+  section + .part-banner { margin-top: 64px; }
+
+  /* section */
+  section.topic {
+    margin-bottom: 112px;
+    scroll-margin-top: 64px;
+  }
+  .topic-head {
+    margin-bottom: 32px;
+  }
+  .topic-kicker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .topic-kicker .topic-num {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .topic-title {
+    font-family: "Manrope", sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 3vw, 36px);
+    letter-spacing: -0.03em;
+    margin: 0;
+    line-height: 1.2;
+    color: var(--ink-main);
+  }
+  .topic-title .accent-word { color: var(--accent); }
+
+  .topic-body {
+    display: grid;
+    gap: 32px;
+  }
+  .topic-body p { margin: 0; }
+  .topic-body p.lead {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    font-weight: 400;
+    max-width: 65ch;
+  }
+  .topic-body p.lead em {
+    font-style: normal;
+    color: var(--ink-main);
+    font-weight: 600;
+  }
+
+  /* ---------- key points list ---------- */
+  .points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--rule-med);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
+    overflow: hidden;
+  }
+  .points li {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--rule-light);
+    align-items: baseline;
+    transition: background 0.2s ease;
+  }
+  .points li:hover {
+    background: var(--bg-code);
+  }
+  .points li:last-child { border-bottom: none; }
+  .points .tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-main);
+    font-weight: 600;
+  }
+  .points .tag.accent { color: var(--accent); }
+  .points li > span:last-child { color: var(--ink-muted); font-size: 14px; }
+
+  /* ---------- definition grid (cards) ---------- */
+  .defgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .defgrid > div {
+    background: var(--bg-surface);
+    border: 1px solid var(--rule-med);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  /* subtle top-edge color accent on hover */
+  .defgrid > div::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .defgrid > div:hover::before {
+    transform: scaleX(1);
+  }
+  .defgrid > div:hover {
+    border-color: var(--accent-faint);
+    box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08), 0 2px 4px rgba(0,0,0,0.03);
+    transform: translateY(-2px);
+  }
+  .defgrid dt {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-main);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .defgrid dd {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /* ---------- callouts ---------- */
+  .callout {
+    padding: 24px 28px;
+    background: var(--bg-callout);
+    border-left: 4px solid var(--rule-dark);
+    border-radius: 0 12px 12px 0;
+    position: relative;
+    transition: border-left-color 0.25s ease;
+  }
+  .callout:hover {
+    border-left-color: var(--ink-faint);
+  }
+  .callout.accent {
+    background: var(--accent-bg);
+    border-left-color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.06);
+  }
+  .callout.accent:hover {
+    border-left-color: var(--accent-hover);
+  }
+  .callout .cal-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .callout.accent .cal-label { color: var(--accent); }
+  .callout p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+  .callout.accent p { color: var(--ink-main); }
+  .callout em {
+    color: var(--ink-main);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .callout code {
+    background: #ffffff;
+    border: 1px solid var(--rule-med);
+  }
+  /* scenario callout — warm amber */
+  .callout.scenario {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+  }
+  .callout.scenario:hover { border-left-color: #d97706; }
+  .callout.scenario .cal-label { color: #b45309; }
+  .callout.scenario p { color: var(--ink-main); }
+  /* hard-point callout — rose/red */
+  .callout.hardpoint {
+    background: #fff1f2;
+    border-left-color: #f43f5e;
+  }
+  .callout.hardpoint:hover { border-left-color: #e11d48; }
+  .callout.hardpoint .cal-label { color: #e11d48; }
+  .callout.hardpoint p { color: var(--ink-main); }
+  /* tip callout — emerald */
+  .callout.tip {
+    background: #ecfdf5;
+    border-left-color: #10b981;
+  }
+  .callout.tip:hover { border-left-color: #059669; }
+  .callout.tip .cal-label { color: #059669; }
+  .callout.tip p { color: var(--ink-main); }
+
+  /* ---------- code blocks ---------- */
+  pre.code {
+    background: var(--bg-code);
+    border: 1px solid var(--rule-med);
+    border-radius: 12px;
+    padding: 24px 28px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0;
+    position: relative;
+    color: var(--ink-main);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), inset 0 1px 2px rgba(0,0,0,0.02);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  pre.code:hover {
+    border-color: var(--rule-dark);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 2px rgba(0,0,0,0.02);
+  }
+  pre.code::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    background: var(--bg-code);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--rule-light);
+  }
+  /* line-number gutter effect via left border */
+  pre.code::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: var(--accent-faint);
+    border-radius: 0 2px 2px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  pre.code:hover::after {
+    opacity: 1;
+  }
+  code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9em;
+    color: var(--ink-main);
+  }
+  p code, li code, dd code, .callout code {
+    background: var(--bg-surface);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    color: var(--accent);
+    font-weight: 600;
+    border: 1px solid var(--rule-med);
+  }
+
+  /* syntax highlighting tokens */
+  .k   { color: var(--keyword);  font-weight: 600; }
+  .s   { color: var(--string);   }
+  .c   { color: var(--comment);  font-style: italic; }
+  .f   { color: var(--func);     }
+  .cls { color: var(--class-c);  font-weight: 600; }
+  .n   { color: var(--number);   }
+
+  /* ---------- example label ---------- */
+  .eg-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 8px 0 -16px;
+    font-weight: 600;
+  }
+  .eg-label .eg-num {
+    color: var(--accent);
+    background: var(--accent-faint);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+  }
+
+  /* ---------- cluster diagram ---------- */
+  .cluster {
+    background: var(--bg-surface);
+    border: 1px solid var(--rule-med);
+    border-radius: 16px;
+    padding: 48px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    background-image: radial-gradient(circle at 1px 1px, var(--rule-light) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  .node {
+    border: 1px solid var(--rule-med);
+    border-radius: 8px;
+    padding: 16px 24px;
+    background: var(--bg-surface);
+    text-align: center;
+    min-width: 140px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+  }
+  .node.master {
+    border: 2px solid var(--accent);
+    background: var(--bg-surface);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  }
+  .node.master:hover {
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+  }
+  .node-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-main);
+    font-weight: 700;
+  }
+  .node.master .node-label { color: var(--accent); }
+  .node-desc {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .cluster .trunk {
+    width: 2px;
+    height: 32px;
+    background: var(--rule-dark);
+  }
+  .cluster .fanout {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 24px;
+  }
+  .cluster .fanout::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: var(--rule-dark);
+  }
+  .cluster .fanout .drop {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--rule-dark);
+  }
+  .cluster .fanout .drop.l { left: 10%; }
+  .cluster .fanout .drop.c { left: 50%; }
+  .cluster .fanout .drop.r { right: 10%; }
+  .cluster .workers {
+    display: flex;
+    gap: 24px;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* ---------- footer ---------- */
+  footer.closer {
+    grid-column: 1 / -1;
+    margin-top: 40px;
+    padding: 40px 0 0;
+    border-top: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+  footer.closer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rule-med) 30%, var(--accent-faint) 60%, var(--accent), var(--accent-faint) 80%, var(--rule-med) 90%, transparent);
+    border-radius: 1px;
+  }
+  footer.closer .footer-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-faint);
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  footer.closer .footer-title {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink-main);
+    letter-spacing: -0.01em;
+  }
+  footer.closer .footer-sub {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  footer.closer .footer-links {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  footer.closer .footer-links a {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: color 0.2s ease;
+  }
+  footer.closer .footer-links a:hover {
+    color: var(--accent-hover);
+  }
+
+  /* ---------- smooth fade-in on scroll ---------- */
+  section.topic {
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+      padding: 40px 24px 100px;
+      gap: 48px;
+    }
+    nav.toc {
+      position: static;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--rule-med);
+      border-left: none;
+    }
+    nav.toc ol {
+      border-left: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+    }
+    nav.toc a {
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    nav.toc a::before { display: none; }
+    
+    .masthead {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding-bottom: 32px;
+    }
+    .masthead .meta { text-align: left; }
+    .topic-title { font-size: 32px; }
+    .topic-body p.lead { font-size: 16px; }
+    .points li {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 16px;
+    }
+    .cluster .workers { gap: 12px; }
+    .node { min-width: 90px; padding: 12px; }
+  }
+
+  /* subtle selection */
+  ::selection {
+    background: var(--accent-faint);
+    color: var(--accent-hover);
+  }
+
+  /* smooth scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--rule-dark); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <header class="masthead">
+    <div>
+      <div class="kicker">PySpark · Practical Reference</div>
+      <h1>The PySpark <span class="accent-word">field guide.</span></h1>
+      <p class="subtitle">From first principles and cluster architecture through real analytics workflows — a hands-on reference for the SQL-fluent data engineer, with worked examples at every step.</p>
+      <a href="#s1" class="cta-pill">Start reading</a>
+    </div>
+    <div class="meta">
+      <div class="edition">30 sections · 5 parts</div>
+      <div>Covers foundations → SQL → RDDs</div>
+      <div>By Abhishek Raj</div>
+      <div>Apr 2026</div>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="label">Contents</div>
+    <div class="toc-part">Foundations</div>
+    <ol>
+      <li><a href="#s1">What is PySpark?</a></li>
+      <li><a href="#s2">When to use it</a></li>
+      <li><a href="#s3">Spark cluster</a></li>
+      <li><a href="#s4">SparkSession</a></li>
+      <li><a href="#s5">DataFrames</a></li>
+    </ol>
+    <div class="toc-part">Working with DataFrames</div>
+    <ol start="6">
+      <li><a href="#s7">Scalability &amp; performance</a></li>
+      <li><a href="#s8">About DataFrames</a></li>
+      <li><a href="#s9">Creating from files</a></li>
+      <li><a href="#s10">Inspecting data</a></li>
+      <li><a href="#s11">Basic analytics</a></li>
+      <li><a href="#s12">Key operations</a></li>
+    </ol>
+    <div class="toc-part">Operations &amp; Schemas</div>
+    <ol start="12">
+      <li><a href="#s13">Reading formats</a></li>
+      <li><a href="#s14">Schemas &amp; types</a></li>
+      <li><a href="#s15">Select &amp; filter</a></li>
+      <li><a href="#s16">Sort &amp; nulls</a></li>
+    </ol>
+    <div class="toc-part">PySpark in Python</div>
+    <ol start="16">
+      <li><a href="#s17">Missing data</a></li>
+      <li><a href="#s20">Column operations</a></li>
+      <li><a href="#s21">Advanced operations</a></li>
+      <li><a href="#s22">Unions &amp; combinations</a></li>
+      <li><a href="#s23">Joins</a></li>
+      <li><a href="#s24">UDFs</a></li>
+      <li><a href="#s25">Pandas UDFs</a></li>
+    </ol>
+    <div class="toc-part">PySpark SQL &amp; RDDs</div>
+    <ol start="23">
+      <li><a href="#s26">RDDs</a></li>
+      <li><a href="#s28">Spark SQL</a></li>
+      <li><a href="#s29">SQL analytics</a></li>
+      <li><a href="#s26">Aggregations</a></li>
+      <li><a href="#s27">Complex aggregations</a></li>
+      <li><a href="#s28">RDD aggregations</a></li>
+      <li><a href="#s29">Broadcasting</a></li>
+      <li><a href="#s30">End-to-end pipeline</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============================================== -->
+    <!--              PART 01 — FOUNDATIONS             -->
+    <!-- ============================================== -->
+    <div class="part-banner">
+      <span class="dot"></span>
+      <span class="name">Part 01 &nbsp;·&nbsp; Foundations</span>
+      <span class="line"></span>
+    </div>
+
+    <!-- ====== 01 ====== -->
+    <section id="s1" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 01</span>
+        </div>
+        <h2 class="topic-title">What is PySpark?</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Apache Spark is an <em>open-source, distributed computing system</em> engineered for fast processing at large scale. PySpark is simply its Python interface.</p>
+
+        <dl class="defgrid">
+          <div><dt>Apache Spark</dt><dd>Open-source distributed computing engine for fast, large-scale data processing.</dd></div>
+          <div><dt>PySpark</dt><dd>The Python API over Spark — brings Spark's engine into Python workflows.</dd></div>
+          <div><dt>Parallel compute</dt><dd>Handles large datasets efficiently across many nodes at once.</dd></div>
+          <div><dt>Workload types</dt><dd>Batch, real-time streaming, ML, analytics, SQL querying.</dd></div>
+          <div><dt>Industries</dt><dd>Finance, healthcare, e-commerce — where scale and speed matter.</dd></div>
+        </dl>
+
+        <div class="callout accent">
+          <div class="cal-label">Mental model</div>
+          <p>Spark is the <em>engine</em>. PySpark is the <em>steering wheel</em> in Python. Scala, Java, and R have their own wheels attached to the same engine.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 02 ====== -->
+    <section id="s2" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 02</span>
+        </div>
+        <h2 class="topic-title">When would we use PySpark?</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Reach for PySpark when the data no longer fits — practically or economically — on a single machine.</p>
+
+        <ul class="points">
+          <li><span class="tag accent">Analytics</span><span>Distributed processing with in-memory computation for speed.</span></li>
+          <li><span class="tag accent">Machine learning</span><span>MLlib for scalable model training and evaluation on large datasets.</span></li>
+          <li><span class="tag accent">ETL / ELT</span><span>Transforms high-volume raw data into structured, usable formats.</span></li>
+          <li><span class="tag">Flexibility</span><span>Works with diverse sources — CSV, Parquet, JSON, JDBC, and more.</span></li>
+        </ul>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>Think of pandas as <em>one laptop, one query</em> and Spark as <em>a warehouse cluster you drive with code</em>. If your workload would OOM a laptop, it's a Spark job.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 03 ====== -->
+    <section id="s3" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 03</span>
+        </div>
+        <h2 class="topic-title">The Spark cluster</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">A <em>Spark cluster</em> is a group of computers that cooperate to process large datasets. One <em>master</em> coordinates, many <em>workers</em> execute.</p>
+
+        <div class="cluster">
+          <div class="node master">
+            <div class="node-label">Master</div>
+            <div class="node-desc">coordinates</div>
+          </div>
+          <div class="trunk"></div>
+          <div class="fanout">
+            <div class="drop l"></div>
+            <div class="drop c"></div>
+            <div class="drop r"></div>
+          </div>
+          <div class="workers">
+            <div class="node">
+              <div class="node-label">Worker</div>
+              <div class="node-desc">executes</div>
+            </div>
+            <div class="node">
+              <div class="node-label">Worker</div>
+              <div class="node-desc">executes</div>
+            </div>
+            <div class="node">
+              <div class="node-label">Worker</div>
+              <div class="node-desc">executes</div>
+            </div>
+          </div>
+        </div>
+
+        <ul class="points">
+          <li><span class="tag accent">Master</span><span>Manages resources, assigns tasks, tracks job state.</span></li>
+          <li><span class="tag">Workers</span><span>Execute the compute tasks assigned to them.</span></li>
+          <li><span class="tag">Architecture</span><span>Enables distributed, parallel processing of one logical dataset.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ====== 04 ====== -->
+    <section id="s4" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 04</span>
+        </div>
+        <h2 class="topic-title">SparkSession — the entry point</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">A <em>SparkSession</em> is the doorway into PySpark. Through it you execute queries, process data, and manage resources inside the cluster.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql <span class="k">import</span> <span class="cls">SparkSession</span>
+
+<span class="c"># create or retrieve a session named "MySparkApp"</span>
+spark = (
+    <span class="cls">SparkSession</span>.builder
+        .<span class="f">appName</span>(<span class="s">"MySparkApp"</span>)
+        .<span class="f">getOrCreate</span>()
+)</pre>
+
+        <dl class="defgrid">
+          <div><dt>.builder</dt><dd>Starts configuring a new session — the method chain begins here.</dd></div>
+          <div><dt>.appName(name)</dt><dd>Labels the app so you can distinguish multiple PySpark jobs.</dd></div>
+          <div><dt>.getOrCreate()</dt><dd>Returns an existing session if one exists, else creates a fresh one.</dd></div>
+          <div><dt>spark</dt><dd>The handle you use for everything — reading data, SQL, configs.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 01</span><span>Create and inspect a session</span></div>
+        <pre class="code" data-lang="python"><span class="c"># Import SparkSession from pyspark.sql</span>
+<span class="k">from</span> pyspark.sql <span class="k">import</span> <span class="cls">SparkSession</span>
+
+<span class="c"># Create my_spark</span>
+my_spark = <span class="cls">SparkSession</span>.builder.<span class="f">appName</span>(<span class="s">"my_spark"</span>).<span class="f">getOrCreate</span>()
+
+<span class="c"># Print my_spark</span>
+<span class="f">print</span>(my_spark)</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Best practice</div>
+          <p>Always prefer <code>SparkSession.builder.getOrCreate()</code>. It's idempotent — safe to call anywhere in your code without spawning a second session.</p>
+        </div>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>If Snowflake or Databricks gives you a <em>warehouse</em> or a <em>cluster attachment</em>, SparkSession is the programmatic equivalent — your open connection to the compute.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 05 ====== -->
+    <section id="s5" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 05</span>
+        </div>
+        <h2 class="topic-title">PySpark DataFrames</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">A PySpark <em>DataFrame</em> is a distributed, table-like structure optimized for large-scale data. The surface looks like pandas; underneath, it lives across the cluster.</p>
+
+        <ul class="points">
+          <li><span class="tag accent">Distributed</span><span>Rows are partitioned across worker nodes, not sitting in local RAM.</span></li>
+          <li><span class="tag">API feel</span><span>Similar to pandas — same intent, different execution model.</span></li>
+          <li><span class="tag">Inspect</span><span>Use <code>.show()</code> to print rows to the console.</span></li>
+        </ul>
+
+        <pre class="code" data-lang="python"><span class="c"># read a CSV into a distributed DataFrame</span>
+df = spark.read.<span class="f">csv</span>(data, schema=columns)
+
+<span class="c"># peek at the contents</span>
+df.<span class="f">show</span>()</pre>
+
+        <div class="eg-label"><span class="eg-num">Ex 02</span><span>Load a real CSV</span></div>
+        <pre class="code" data-lang="python"><span class="c"># Read in the CSV</span>
+census_adult = spark.read.<span class="f">csv</span>(<span class="s">"adult_reduced.csv"</span>)
+
+<span class="c"># Show the DataFrame</span>
+census_adult.<span class="f">show</span>()</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Watch for</div>
+          <p>Pandas evaluates immediately. Spark is <em>lazy</em> — transformations build a plan, and nothing runs until an <em>action</em> like <code>.show()</code>, <code>.count()</code>, or <code>.collect()</code> forces it. This is the single biggest mental shift coming from SQL or pandas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--     PART 02 — WORKING WITH DATAFRAMES          -->
+    <!-- ============================================== -->
+    <div class="part-banner">
+      <span class="dot"></span>
+      <span class="name">Part 02 &nbsp;·&nbsp; Working with DataFrames</span>
+      <span class="line"></span>
+    </div>
+
+    <!-- ====== 06 — NEW ====== -->
+    <section id="s6" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 06</span>
+        </div>
+        <h2 class="topic-title">Scalability &amp; <span class="accent-word">performance</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Spark scales by <em>distributing</em> data and compute across a cluster. Understanding <em>lazy evaluation</em>, <em>partitioning</em>, and the <em>Catalyst optimizer</em> is what separates working code from fast code.</p>
+
+        <dl class="defgrid">
+          <div><dt>Lazy evaluation</dt><dd>Transformations (<code>filter</code>, <code>select</code>, <code>withColumn</code>) build a logical plan. Nothing executes until an action (<code>show</code>, <code>count</code>, <code>write</code>) triggers it.</dd></div>
+          <div><dt>Catalyst optimizer</dt><dd>Spark's query planner — rewrites your logical plan into an optimized physical plan (predicate pushdown, column pruning, join reordering).</dd></div>
+          <div><dt>Partitions</dt><dd>Data is split into chunks distributed across workers. More partitions = more parallelism, but too many = scheduling overhead.</dd></div>
+          <div><dt>In-memory compute</dt><dd>Spark caches intermediate results in RAM, avoiding repeated disk I/O — this is why it's faster than MapReduce.</dd></div>
+        </dl>
+
+        <pre class="code" data-lang="python"><span class="c"># check how many partitions a DataFrame has</span>
+df.rdd.<span class="f">getNumPartitions</span>()
+
+<span class="c"># repartition — increase parallelism (causes a shuffle)</span>
+df_repart = df.<span class="f">repartition</span>(<span class="n">200</span>)
+
+<span class="c"># coalesce — reduce partitions without a full shuffle</span>
+df_small = df.<span class="f">coalesce</span>(<span class="n">10</span>)
+
+<span class="c"># cache a DataFrame in memory for repeated use</span>
+df.<span class="f">cache</span>()
+df.<span class="f">count</span>()  <span class="c"># triggers the cache materialization</span>
+
+<span class="c"># explain the physical plan — see what Spark will actually do</span>
+df.<span class="f">filter</span>(df.age > <span class="n">30</span>).<span class="f">select</span>(<span class="s">"name"</span>).<span class="f">explain</span>(<span class="k">True</span>)</pre>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — when it matters</div>
+          <p>You're running a daily ETL that reads 500 GB of Parquet, filters it, joins with a 50 MB lookup, and writes to Delta. Without <code>.cache()</code> on the filtered DataFrame (used in both join and an audit count), Spark reads and filters the 500 GB <em>twice</em>. With <code>.cache()</code>, the second pass hits RAM. On a 20-node cluster, that's 15 minutes saved per run.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p><code>.repartition(n)</code> causes a <em>full shuffle</em> — every row is redistributed. It's expensive. Use <code>.coalesce(n)</code> to reduce partitions without a shuffle. Only repartition when you're fixing severe skew or preparing for a partitioned write.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>Run <code>.explain(True)</code> on your final DataFrame before production. Look for <code>Exchange</code> (shuffles) and <code>BroadcastHashJoin</code> vs <code>SortMergeJoin</code> — these tell you where the time goes. In Databricks, the Spark UI's SQL tab visualizes this even better.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 07 ====== -->
+    <section id="s7" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 07</span>
+        </div>
+        <h2 class="topic-title">About DataFrames — pandas vs. Spark</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Pandas and PySpark DataFrames <em>look</em> alike. The critical difference is <em>where the data lives</em> — pandas keeps it on one machine, Spark spreads it across a cluster.</p>
+
+        <dl class="defgrid">
+          <div><dt>Pandas</dt><dd>Single compute instance. Data fits in one machine's memory.</dd></div>
+          <div><dt>PySpark</dt><dd>Distributes data across many instances. Scales out, not up.</dd></div>
+          <div><dt>Designed for</dt><dd>Much larger datasets than pandas can comfortably handle.</dd></div>
+          <div><dt>Supports</dt><dd>Filtering, grouping, aggregating — plus SQL-like operations.</dd></div>
+        </dl>
+
+        <div class="callout accent">
+          <div class="cal-label">Watch for</div>
+          <p>The <em>syntax</em> looks familiar from pandas, but the <em>execution model</em> is different. Same verbs, different physics — Spark is lazy and distributed, pandas is eager and local.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 07 ====== -->
+    <section id="s8" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 08</span>
+        </div>
+        <h2 class="topic-title">Creating DataFrames from files</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">The canonical entry point — <code>spark.read.csv()</code> reads a file into a DataFrame, promotes the first row to headers, and infers column types.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># load CSV with headers + type inference</span>
+df = spark.read.<span class="f">csv</span>(
+    <span class="s">"path/to/file.csv"</span>,
+    header=<span class="k">True</span>,
+    inferSchema=<span class="k">True</span>,
+)</pre>
+
+        <dl class="defgrid">
+          <div><dt>header=True</dt><dd>Treats the first row as column names instead of data.</dd></div>
+          <div><dt>inferSchema=True</dt><dd>Scans the file to detect types — int, double, string, etc.</dd></div>
+          <div><dt>Other args</dt><dd><code>sep</code>, <code>quote</code>, <code>nullValue</code>, <code>dateFormat</code>, <code>encoding</code>, and more.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">Cost note</div>
+          <p><code>inferSchema=True</code> makes Spark read the file <em>twice</em> — once to figure out types, once to load. For large files, supplying an explicit <code>schema=</code> is faster and more predictable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 08 ====== -->
+    <section id="s9" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 09</span>
+        </div>
+        <h2 class="topic-title">Inspecting a DataFrame</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Two inspection methods you'll reach for constantly — <code>.show()</code> to see rows, <code>.printSchema()</code> to see structure.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># preview the first 5 rows (default n=20; pass n to override)</span>
+df.<span class="f">show</span>(<span class="n">5</span>)
+
+<span class="c"># display the inferred schema — column names, types, nullability</span>
+df.<span class="f">printSchema</span>()</pre>
+
+        <ul class="points">
+          <li><span class="tag accent">.show(n)</span><span>Prints <code>n</code> rows in a formatted table. Default is 20.</span></li>
+          <li><span class="tag accent">.printSchema()</span><span>Tree view of columns and their data types.</span></li>
+          <li><span class="tag">createDataFrame()</span><span>Alternate way to build a DataFrame, e.g., from a Python list. Works, but <code>spark.read.csv()</code> is generally faster at scale.</span></li>
+        </ul>
+
+        <div class="callout">
+          <div class="cal-label">Best practice</div>
+          <p>At scale, always prefer <code>spark.read.*</code> over <code>createDataFrame()</code>. The file readers are optimized for parallel I/O across the cluster.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 09 ====== -->
+    <section id="s10" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 10</span>
+        </div>
+        <h2 class="topic-title">Basic analytics on DataFrames</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Once data is loaded, <em>aggregations</em> summarize it — counts, sums, averages. Simple ones return a scalar; grouped ones return another DataFrame.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># simple aggregation — returns an integer</span>
+df.<span class="f">count</span>()
+
+<span class="c"># grouped aggregation: avg salary per gender</span>
+df.<span class="f">groupBy</span>(<span class="s">"gender"</span>).<span class="f">agg</span>({<span class="s">"salary_usd"</span>: <span class="s">"avg"</span>}).<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>.count()</dt><dd>Returns the total number of rows — an integer.</dd></div>
+          <div><dt>.groupBy(col)</dt><dd>Buckets rows by column values — like SQL <code>GROUP BY</code>.</dd></div>
+          <div><dt>.agg(...)</dt><dd>Applies one or more aggregation functions to the groups.</dd></div>
+          <div><dt>Typical funcs</dt><dd><code>avg</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>stddev</code>, <code>count</code>.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>The example is literally <code>SELECT gender, AVG(salary_usd) FROM df GROUP BY gender</code>. Spark's fluent API is just that query expressed as method calls.</p>
+        </div>
+
+        <div class="eg-label"><span class="eg-num">Ex 03</span><span>Load, count, group &amp; aggregate</span></div>
+        <pre class="code" data-lang="python"><span class="c"># Load the CSV file into a DataFrame</span>
+salaries_df = spark.read.<span class="f">csv</span>(<span class="s">"salaries.csv"</span>, header=<span class="k">True</span>, inferSchema=<span class="k">True</span>)
+
+<span class="c"># Count the total number of rows</span>
+row_count = salaries_df.<span class="f">count</span>()
+<span class="f">print</span>(<span class="s">f"Total rows: {row_count}"</span>)
+
+<span class="c"># Group by company size and calculate the average of salaries</span>
+salaries_df.<span class="f">groupby</span>(<span class="s">"company_size"</span>).<span class="f">agg</span>({<span class="s">"salary_in_usd"</span>: <span class="s">"avg"</span>}).<span class="f">show</span>()
+salaries_df.<span class="f">show</span>()</pre>
+
+        <div class="callout">
+          <div class="cal-label">Small note</div>
+          <p><code>groupby</code> and <code>groupBy</code> both work — they're aliases. Convention in most Spark codebases is camelCase <code>groupBy</code> to match the rest of the DataFrame API.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 10 ====== -->
+    <section id="s11" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 11</span>
+        </div>
+        <h2 class="topic-title">Key operations — the <span class="accent-word">SQL quartet</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Four methods do most of the work — <code>select</code>, <code>filter</code>, <code>groupBy</code>, <code>agg</code>. Each maps to a SQL clause you already know.</p>
+
+        <dl class="defgrid">
+          <div><dt>.select(cols)</dt><dd>Picks specific columns. ≈ SQL <code>SELECT</code>.</dd></div>
+          <div><dt>.filter(cond)</dt><dd>Keeps rows matching a condition. ≈ SQL <code>WHERE</code>.</dd></div>
+          <div><dt>.groupBy(cols)</dt><dd>Partitions rows into groups. ≈ SQL <code>GROUP BY</code>.</dd></div>
+          <div><dt>.agg(funcs)</dt><dd>Aggregates each group. ≈ <code>SUM</code>, <code>AVG</code>, etc. in the <code>SELECT</code>.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 04</span><span>Filter + select</span></div>
+        <pre class="code" data-lang="python"><span class="c"># rows where age > 50, keeping all columns</span>
+df.<span class="f">filter</span>(df.age &gt; <span class="n">50</span>).<span class="f">select</span>(<span class="s">"*"</span>).<span class="f">show</span>()
+
+<span class="c"># or with explicit columns</span>
+df.<span class="f">filter</span>(df.age &gt; <span class="n">50</span>).<span class="f">select</span>(<span class="s">"name"</span>, <span class="s">"age"</span>, <span class="s">"salary_usd"</span>).<span class="f">show</span>()</pre>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>Mental translation: <code>df.filter(df.age &gt; 50).select("name", "age")</code> is <code>SELECT name, age FROM df WHERE age &gt; 50</code>. The pipeline order differs — Spark reads left-to-right, SQL reads top-down — but the operators are the same.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">Chainable</div>
+          <p>Every method returns a new DataFrame, so you can chain: <code>df.filter(...).groupBy(...).agg(...).show()</code>. Nothing executes until an action such as <code>.show()</code>, <code>.count()</code>, or <code>.collect()</code> runs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--     PART 03 — OPERATIONS & SCHEMAS             -->
+    <!-- ============================================== -->
+    <div class="part-banner">
+      <span class="dot"></span>
+      <span class="name">Part 03 &nbsp;·&nbsp; Operations &amp; Schemas</span>
+      <span class="line"></span>
+    </div>
+
+    <!-- ====== 11 ====== -->
+    <section id="s12" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 12</span>
+        </div>
+        <h2 class="topic-title">Reading data formats</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">PySpark reads from many file formats. Each has trade-offs — pick the one that matches the <em>shape</em> of your data and the <em>workload</em> it will serve.</p>
+
+        <dl class="defgrid">
+          <div><dt>CSV · read.csv()</dt><dd>Plain-text, widely compatible. No schema enforcement — expect type inconsistencies.</dd></div>
+          <div><dt>JSON · read.json()</dt><dd>Nested or hierarchical data; high compatibility; storage-heavy at scale.</dd></div>
+          <div><dt>Parquet · read.parquet()</dt><dd>Columnar, read-optimized, schema-enforced, supports nested types. Ideal for analytics.</dd></div>
+        </dl>
+
+        <pre class="code" data-lang="python"><span class="c"># three ways in, same DataFrame out</span>
+df_csv     = spark.read.<span class="f">csv</span>(<span class="s">"data.csv"</span>, header=<span class="k">True</span>, inferSchema=<span class="k">True</span>)
+df_json    = spark.read.<span class="f">json</span>(<span class="s">"data.json"</span>)
+df_parquet = spark.read.<span class="f">parquet</span>(<span class="s">"data.parquet"</span>)</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Rule of thumb</div>
+          <p>For anything beyond ingestion, write intermediate and final data to <em>Parquet</em> — or Delta, which wraps Parquet. Columnar layout plus schema enforcement equals faster queries and fewer surprises downstream.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 12 ====== -->
+    <section id="s13" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 13</span>
+        </div>
+        <h2 class="topic-title">Schemas &amp; data types</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Spark can <em>infer</em> a schema, but with complex or ambiguous data it guesses wrong. Define the schema yourself and Spark stops guessing.</p>
+
+        <ul class="points">
+          <li><span class="tag accent">Inference</span><span>Automatic — Spark scans the file and picks types. Convenient, occasionally wrong.</span></li>
+          <li><span class="tag accent">Manual</span><span>Explicit — you declare each column's type via <code>StructType</code> and <code>StructField</code>.</span></li>
+        </ul>
+
+        <dl class="defgrid">
+          <div><dt>IntegerType</dt><dd>Whole numbers (32-bit).</dd></div>
+          <div><dt>LongType</dt><dd>Larger integers (64-bit).</dd></div>
+          <div><dt>FloatType</dt><dd>Decimal numbers (32-bit).</dd></div>
+          <div><dt>DoubleType</dt><dd>Decimal numbers (64-bit) — Spark's default for decimals.</dd></div>
+          <div><dt>StringType</dt><dd>Text values.</dd></div>
+        </dl>
+
+        <pre class="code" data-lang="python"><span class="c"># import the type classes</span>
+<span class="k">from</span> pyspark.sql.types <span class="k">import</span> (
+    <span class="cls">StructType</span>, <span class="cls">StructField</span>,
+    <span class="cls">IntegerType</span>, <span class="cls">StringType</span>, <span class="cls">DoubleType</span>,
+)
+
+<span class="c"># build the schema — one StructField per column</span>
+schema = <span class="cls">StructType</span>([
+    <span class="cls">StructField</span>(<span class="s">"id"</span>,     <span class="cls">IntegerType</span>(), <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"name"</span>,   <span class="cls">StringType</span>(),  <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"salary"</span>, <span class="cls">DoubleType</span>(),  <span class="k">True</span>),
+])
+
+<span class="c"># pass it into the reader — no more inferSchema</span>
+df = spark.read.<span class="f">csv</span>(<span class="s">"file.csv"</span>, header=<span class="k">True</span>, schema=schema)</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Best practice</div>
+          <p>The third argument to <code>StructField</code> — here <code>True</code> — is <em>nullable</em>. Leave it <code>True</code> unless you have a strong guarantee the column will never be null; a single stray null in a non-nullable column will fail the whole job.</p>
+        </div>
+
+        <div class="callout">
+          <div class="cal-label">Why skip inferSchema?</div>
+          <p>Two wins — speed, because Spark stops double-reading the file, and determinism, because the same file always yields the same types, avoiding silent type drift in production.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 13 ====== -->
+    <section id="s14" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 14</span>
+        </div>
+        <h2 class="topic-title">Selection &amp; filtering</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Two fundamentals — pick the columns you want, keep only the rows you want. Both run efficiently on very large datasets.</p>
+
+        <dl class="defgrid">
+          <div><dt>.select(cols)</dt><dd>Keep specific columns. ≈ SQL <code>SELECT</code>.</dd></div>
+          <div><dt>.filter(cond)</dt><dd>Keep rows matching a condition. ≈ SQL <code>WHERE</code>.</dd></div>
+          <div><dt>.where(cond)</dt><dd>Alias of <code>.filter()</code> — identical behavior, choose by taste.</dd></div>
+        </dl>
+
+        <pre class="code" data-lang="python"><span class="c"># pick columns</span>
+df.<span class="f">select</span>(<span class="s">"name"</span>, <span class="s">"salary"</span>).<span class="f">show</span>()
+
+<span class="c"># filter rows — .filter() and .where() are interchangeable</span>
+df.<span class="f">filter</span>(df.salary &gt; <span class="n">100000</span>).<span class="f">show</span>()
+df.<span class="f">where</span>(df.salary &gt; <span class="n">100000</span>).<span class="f">show</span>()
+
+<span class="c"># chain them together</span>
+df.<span class="f">filter</span>(df.age &gt; <span class="n">30</span>).<span class="f">select</span>(<span class="s">"name"</span>, <span class="s">"salary"</span>).<span class="f">show</span>()</pre>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>If you read SQL top-down as <code>SELECT ... FROM ... WHERE ...</code>, Spark pipelines read left-to-right: <code>df.filter(...).select(...)</code>. Same query, different grammar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 14 ====== -->
+    <section id="s15" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 15</span>
+        </div>
+        <h2 class="topic-title">Sorting &amp; handling nulls</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Two common post-load chores — put rows in order, and decide what to do with missing values.</p>
+
+        <dl class="defgrid">
+          <div><dt>.sort(cols)</dt><dd>Sort by one or more columns. ≈ SQL <code>ORDER BY</code>.</dd></div>
+          <div><dt>.orderBy(cols)</dt><dd>Alias of <code>.sort()</code> — same mechanics.</dd></div>
+          <div><dt>.na.drop()</dt><dd>Drop rows containing any null values.</dd></div>
+          <div><dt>.na.fill(value)</dt><dd>Impute — replace nulls with a value (scalar or per-column dict).</dd></div>
+        </dl>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> col, desc
+
+<span class="c"># sort ascending by a single column</span>
+df.<span class="f">sort</span>(<span class="s">"salary"</span>).<span class="f">show</span>()
+
+<span class="c"># multi-column, mixed directions</span>
+df.<span class="f">orderBy</span>(col(<span class="s">"department"</span>).<span class="f">asc</span>(), col(<span class="s">"salary"</span>).<span class="f">desc</span>()).<span class="f">show</span>()
+
+<span class="c"># drop any row with a null in any column</span>
+df.<span class="f">na</span>.<span class="f">drop</span>().<span class="f">show</span>()
+
+<span class="c"># or fill nulls instead — per-column imputation</span>
+df.<span class="f">na</span>.<span class="f">fill</span>({<span class="s">"salary"</span>: <span class="n">0</span>, <span class="s">"department"</span>: <span class="s">"unknown"</span>}).<span class="f">show</span>()</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Heads up</div>
+          <p>The course frames <code>.sort()</code> as "simple" and <code>.orderBy()</code> as "complex multi-column" — in reality both are <em>aliases</em> and both support multiple columns. Use whichever reads better to you.</p>
+        </div>
+
+        <div class="callout">
+          <div class="cal-label">Clean vs. impute</div>
+          <p><code>.na.drop()</code> is destructive — rows disappear. <code>.na.fill()</code> keeps rows but replaces the null with a sentinel value. Imputation is usually safer for analytics; dropping is faster and cleaner when nulls are truly unusable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--     PART 04 — PYSPARK IN PYTHON                -->
+    <!-- ============================================== -->
+    <div class="part-banner">
+      <span class="dot"></span>
+      <span class="name">Part 04 &nbsp;·&nbsp; PySpark in Python</span>
+      <span class="line"></span>
+    </div>
+
+    <!-- ====== 15 ====== -->
+    <section id="s16" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 16</span>
+        </div>
+        <h2 class="topic-title">Handling missing data — <span class="accent-word">fill &amp; drop</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Real data has holes. PySpark gives you two strategies — <em>drop</em> the rows or <em>fill</em> the gaps — and lets you scope each to specific columns.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># drop rows where ANY column is null</span>
+df.<span class="f">na</span>.<span class="f">drop</span>().<span class="f">show</span>()
+
+<span class="c"># drop only if specific columns are null</span>
+df.<span class="f">na</span>.<span class="f">drop</span>(subset=[<span class="s">"salary"</span>, <span class="s">"department"</span>]).<span class="f">show</span>()
+
+<span class="c"># fill with a single value (applies to matching types)</span>
+df.<span class="f">na</span>.<span class="f">fill</span>(<span class="n">0</span>).<span class="f">show</span>()
+
+<span class="c"># fill per-column with a dict</span>
+df.<span class="f">na</span>.<span class="f">fill</span>({<span class="s">"salary"</span>: <span class="n">0</span>, <span class="s">"department"</span>: <span class="s">"Unknown"</span>}).<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>.na.drop()</dt><dd>Removes rows with nulls. Use <code>subset=</code> to target specific columns, <code>how="all"</code> to drop only if every column is null.</dd></div>
+          <div><dt>.na.fill(val)</dt><dd>Replaces nulls. Pass a scalar for all matching-type columns, or a dict for per-column control.</dd></div>
+          <div><dt>thresh=n</dt><dd>Optional in <code>.na.drop()</code> — keep the row only if it has at least <code>n</code> non-null values.</dd></div>
+        </dl>
+
+        <div class="callout accent">
+          <div class="cal-label">SQL bridge</div>
+          <p><code>.na.fill({"salary": 0})</code> is equivalent to <code>COALESCE(salary, 0)</code> in SQL. The <code>.na.drop(subset=["col"])</code> pattern maps to <code>WHERE col IS NOT NULL</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 16 ====== -->
+    <section id="s17" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 17</span>
+        </div>
+        <h2 class="topic-title">Column operations — creating &amp; renaming</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">DataFrames are <em>immutable</em> — you never edit in-place. Instead, you derive new DataFrames with added or renamed columns using <code>withColumn</code> and <code>withColumnRenamed</code>.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> col, lit, upper
+
+<span class="c"># add a new column (or overwrite an existing one with the same name)</span>
+df2 = df.<span class="f">withColumn</span>(<span class="s">"salary_eur"</span>, col(<span class="s">"salary_usd"</span>) * <span class="n">0.92</span>)
+
+<span class="c"># add a constant column</span>
+df3 = df.<span class="f">withColumn</span>(<span class="s">"source"</span>, <span class="f">lit</span>(<span class="s">"survey_2024"</span>))
+
+<span class="c"># rename a column</span>
+df4 = df.<span class="f">withColumnRenamed</span>(<span class="s">"salary_usd"</span>, <span class="s">"salary"</span>)
+
+<span class="c"># transform an existing column</span>
+df5 = df.<span class="f">withColumn</span>(<span class="s">"name"</span>, <span class="f">upper</span>(col(<span class="s">"name"</span>)))</pre>
+
+        <dl class="defgrid">
+          <div><dt>.withColumn(name, expr)</dt><dd>Returns a new DataFrame with an added (or replaced) column. The second argument is any Column expression.</dd></div>
+          <div><dt>.withColumnRenamed(old, new)</dt><dd>Returns a new DataFrame with the column renamed. Original DataFrame is untouched.</dd></div>
+          <div><dt>lit(value)</dt><dd>Creates a literal Column — useful for adding constants, flags, or default values to every row.</dd></div>
+          <div><dt>col(name)</dt><dd>References a column by name — used inside expressions to build derived columns.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p><code>withColumn("salary_eur", col("salary_usd") * 0.92)</code> is like <code>SELECT *, salary_usd * 0.92 AS salary_eur FROM df</code>. Every <code>withColumn</code> call is essentially adding a column to the SELECT list.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">Watch for</div>
+          <p>Chaining many <code>withColumn</code> calls can get slow — each one creates a new projection in the plan. For adding multiple columns at once, consider using <code>.select()</code> with all expressions in one call.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 18 — NEW ====== -->
+    <section id="s18" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 18</span>
+        </div>
+        <h2 class="topic-title">Advanced DataFrame <span class="accent-word">operations</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Beyond basic column math — <em>casting types</em>, <em>conditional columns</em>, <em>string manipulation</em>, and <em>date operations</em> are the bread and butter of real ETL work.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> (
+    col, when, lit, concat, substring, to_date,
+    year, month, datediff, current_date, regexp_replace
+)
+<span class="k">from</span> pyspark.sql.types <span class="k">import</span> <span class="cls">IntegerType</span>, <span class="cls">DoubleType</span>
+
+<span class="c"># cast a column to a different type</span>
+df = df.<span class="f">withColumn</span>(<span class="s">"age"</span>, col(<span class="s">"age"</span>).<span class="f">cast</span>(<span class="cls">IntegerType</span>()))
+
+<span class="c"># conditional column — like SQL CASE WHEN</span>
+df = df.<span class="f">withColumn</span>(<span class="s">"tier"</span>,
+    <span class="f">when</span>(col(<span class="s">"salary"</span>) >= <span class="n">150000</span>, <span class="s">"senior"</span>)
+    .<span class="f">when</span>(col(<span class="s">"salary"</span>) >= <span class="n">80000</span>, <span class="s">"mid"</span>)
+    .<span class="f">otherwise</span>(<span class="s">"junior"</span>)
+)
+
+<span class="c"># string operations</span>
+df = df.<span class="f">withColumn</span>(<span class="s">"clean_name"</span>,
+    <span class="f">regexp_replace</span>(col(<span class="s">"name"</span>), <span class="s">r"[^a-zA-Z\s]"</span>, <span class="s">""</span>)
+)
+
+<span class="c"># date parsing and extraction</span>
+df = df.<span class="f">withColumn</span>(<span class="s">"hire_date"</span>, <span class="f">to_date</span>(col(<span class="s">"hire_str"</span>), <span class="s">"yyyy-MM-dd"</span>))
+df = df.<span class="f">withColumn</span>(<span class="s">"tenure_days"</span>, <span class="f">datediff</span>(<span class="f">current_date</span>(), col(<span class="s">"hire_date"</span>)))
+df = df.<span class="f">withColumn</span>(<span class="s">"hire_year"</span>, <span class="f">year</span>(col(<span class="s">"hire_date"</span>)))</pre>
+
+        <div class="eg-label"><span class="eg-num">Ex 05</span><span>Conditional column — flag overdue invoices</span></div>
+        <pre class="code" data-lang="python"><span class="c"># real-world scenario: flag invoices overdue > 30 days</span>
+invoices = invoices.<span class="f">withColumn</span>(<span class="s">"status"</span>,
+    <span class="f">when</span>(col(<span class="s">"paid"</span>) == <span class="k">True</span>, <span class="s">"paid"</span>)
+    .<span class="f">when</span>(<span class="f">datediff</span>(<span class="f">current_date</span>(), col(<span class="s">"due_date"</span>)) > <span class="n">30</span>, <span class="s">"overdue"</span>)
+    .<span class="f">otherwise</span>(<span class="s">"pending"</span>)
+)</pre>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — ETL pipeline</div>
+          <p>Raw data lands with salary as a string (<code>"$95,000"</code>). You need it as a double for aggregations. Chain: <code>regexp_replace</code> to strip <code>$</code> and <code>,</code> → <code>.cast(DoubleType())</code> → <code>when/otherwise</code> to bucket into bands. This three-step pattern handles 90% of "messy source column" problems.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p><code>when().when().otherwise()</code> evaluates <em>top to bottom, first match wins</em> — exactly like SQL <code>CASE WHEN</code>. If you forget <code>.otherwise()</code>, unmatched rows get <code>null</code>. This is a frequent source of mystery nulls in pipelines.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>For date formats, PySpark follows <em>Java SimpleDateFormat</em> — <code>"yyyy-MM-dd"</code> not <code>"%Y-%m-%d"</code> (that's Python's <code>strftime</code>). Getting this wrong silently returns nulls instead of erroring — always <code>.show()</code> after a <code>to_date()</code> to verify.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 19 — NEW ====== -->
+    <section id="s19" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 19</span>
+        </div>
+        <h2 class="topic-title">Unions &amp; DataFrame <span class="accent-word">combinations</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Joins combine DataFrames <em>horizontally</em> (by key). Unions stack them <em>vertically</em> — appending rows from one onto another. Both are essential for consolidation pipelines.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># union — both DataFrames must have the same number of columns</span>
+<span class="c"># matches by POSITION, not by name</span>
+combined = df_jan.<span class="f">union</span>(df_feb)
+
+<span class="c"># unionByName — matches columns by NAME (safer)</span>
+combined = df_jan.<span class="f">unionByName</span>(df_feb)
+
+<span class="c"># unionByName with allowMissingColumns — handles schema drift</span>
+combined = df_jan.<span class="f">unionByName</span>(df_feb, allowMissingColumns=<span class="k">True</span>)
+
+<span class="c"># deduplicate after union</span>
+combined = df_jan.<span class="f">unionByName</span>(df_feb).<span class="f">distinct</span>()
+
+<span class="c"># drop exact-duplicate rows</span>
+df_clean = df.<span class="f">dropDuplicates</span>()
+
+<span class="c"># drop duplicates based on specific columns</span>
+df_clean = df.<span class="f">dropDuplicates</span>([<span class="s">"email"</span>, <span class="s">"phone"</span>])</pre>
+
+        <dl class="defgrid">
+          <div><dt>.union(other)</dt><dd>Appends rows from <code>other</code>. Matches by column <em>position</em>, not name — risky if schemas differ.</dd></div>
+          <div><dt>.unionByName(other)</dt><dd>Appends rows matched by column <em>name</em>. Fails if a column exists in one but not the other (unless <code>allowMissingColumns=True</code>).</dd></div>
+          <div><dt>.distinct()</dt><dd>Removes exact duplicate rows across all columns.</dd></div>
+          <div><dt>.dropDuplicates(cols)</dt><dd>Removes duplicates based on specific columns — keeps the first occurrence.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 06</span><span>Monthly data consolidation</span></div>
+        <pre class="code" data-lang="python"><span class="c"># consolidate monthly sales files into one DataFrame</span>
+<span class="k">from</span> functools <span class="k">import</span> reduce
+
+months = [<span class="s">"jan"</span>, <span class="s">"feb"</span>, <span class="s">"mar"</span>]
+dfs = [spark.read.<span class="f">parquet</span>(<span class="s">f"sales/{m}.parquet"</span>) <span class="k">for</span> m <span class="k">in</span> months]
+
+<span class="c"># stack them all</span>
+all_sales = <span class="f">reduce</span>(<span class="k">lambda</span> a, b: a.<span class="f">unionByName</span>(b), dfs)
+<span class="f">print</span>(<span class="s">f"Total rows: {all_sales.count()}"</span>)</pre>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p><code>.union()</code> matches by <em>position</em> — if <code>df_jan</code> has <code>(name, salary)</code> and <code>df_feb</code> has <code>(salary, name)</code>, the values silently end up in the wrong columns. <em>Always</em> use <code>.unionByName()</code> in production.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — schema drift</div>
+          <p>Upstream adds a new <code>discount_pct</code> column in March's file but January and February don't have it. With <code>.union()</code> this crashes. With <code>.unionByName(allowMissingColumns=True)</code>, the missing column fills with nulls — which you can then <code>.na.fill(0)</code>. This is the safe pattern for data lakes where schemas evolve over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 20 ====== -->
+    <section id="s20" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 20</span>
+        </div>
+        <h2 class="topic-title">DataFrame <span class="accent-word">joins</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Combining DataFrames by a shared key — the same concept as SQL joins, with the same types and the same gotchas.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># inner join — only matching rows survive</span>
+joined = flights.<span class="f">join</span>(airports, flights.dest == airports.faa, <span class="s">"inner"</span>)
+
+<span class="c"># left outer — keep all from left, null-pad from right</span>
+joined = flights.<span class="f">join</span>(airports, flights.dest == airports.faa, <span class="s">"left"</span>)
+
+<span class="c"># if the key column has the same name in both DataFrames</span>
+joined = df1.<span class="f">join</span>(df2, <span class="s">"id"</span>)  <span class="c"># auto-matches on "id", drops duplicate col</span></pre>
+
+        <dl class="defgrid">
+          <div><dt>.join(other, on, how)</dt><dd>Joins two DataFrames. <code>on</code> is the condition or column name, <code>how</code> is the join type.</dd></div>
+          <div><dt>"inner"</dt><dd>Only rows with matches in both sides. This is the default.</dd></div>
+          <div><dt>"left" / "left_outer"</dt><dd>All rows from the left DataFrame, nulls where no match on the right.</dd></div>
+          <div><dt>"right" / "full"</dt><dd>Right outer and full outer — same semantics as SQL.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 07</span><span>Join flights with airports</span></div>
+        <pre class="code" data-lang="python"><span class="c"># join flights to airports on destination code</span>
+flights_with_dest = flights_df.<span class="f">join</span>(
+    airports_df,
+    flights_df.dest == airports_df.faa,
+    <span class="s">"left"</span>
+)
+flights_with_dest.<span class="f">show</span>(<span class="n">5</span>)</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Watch for</div>
+          <p>When both sides have a column with the <em>same name</em> (e.g., both have <code>"id"</code>), Spark keeps both — causing ambiguous references downstream. Either pass a string (<code>.join(df2, "id")</code>) which auto-deduplicates, or <code>.drop()</code> the duplicate after the join.</p>
+        </div>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p><code>flights.join(airports, flights.dest == airports.faa, "left")</code> maps directly to <code>SELECT * FROM flights LEFT JOIN airports ON flights.dest = airports.faa</code>.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — multi-table enrichment</div>
+          <p>You have a <code>transactions</code> DataFrame (100M rows), a <code>customers</code> lookup (500K rows), and a <code>products</code> lookup (10K rows). Chain: <code>transactions.join(broadcast(products), "product_id").join(broadcast(customers), "customer_id")</code>. Broadcast both small tables to avoid two expensive shuffles. This pattern covers 80% of star-schema enrichment jobs.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p>A <code>left</code> join with a mismatched key type (e.g., string <code>"123"</code> vs integer <code>123</code>) silently produces <em>zero matches</em> — every right-side column becomes null. Always verify key types with <code>.printSchema()</code> on both sides before joining. Cast if needed: <code>df.withColumn("id", col("id").cast("int"))</code>.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>After a join, immediately <code>.select()</code> only the columns you need. Carrying unused columns through the rest of the pipeline wastes memory and shuffle bandwidth — Spark doesn't auto-prune them after a join.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 18 ====== -->
+    <section id="s21" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 21</span>
+        </div>
+        <h2 class="topic-title">User-Defined Functions (UDFs)</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">When built-in functions aren't enough, you write your own. A <em>UDF</em> wraps a Python function so Spark can apply it row-by-row across the cluster.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> udf
+<span class="k">from</span> pyspark.sql.types <span class="k">import</span> <span class="cls">IntegerType</span>, <span class="cls">StringType</span>
+
+<span class="c"># define a regular Python function</span>
+<span class="k">def</span> <span class="f">age_bucket</span>(age):
+    <span class="k">if</span> age <span class="k">is</span> <span class="k">None</span>:
+        <span class="k">return</span> <span class="s">"unknown"</span>
+    <span class="k">return</span> <span class="s">"senior"</span> <span class="k">if</span> age >= <span class="n">60</span> <span class="k">else</span> <span class="s">"adult"</span> <span class="k">if</span> age >= <span class="n">18</span> <span class="k">else</span> <span class="s">"minor"</span>
+
+<span class="c"># register it as a UDF — must declare the return type</span>
+age_bucket_udf = <span class="f">udf</span>(age_bucket, <span class="cls">StringType</span>())
+
+<span class="c"># apply it</span>
+df.<span class="f">withColumn</span>(<span class="s">"bucket"</span>, <span class="f">age_bucket_udf</span>(df.age)).<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>udf(fn, returnType)</dt><dd>Wraps a Python function for distributed execution. You <em>must</em> specify the return type.</dd></div>
+          <div><dt>Return type</dt><dd>Always declare it — <code>StringType()</code>, <code>IntegerType()</code>, <code>DoubleType()</code>, etc. Spark cannot infer it.</dd></div>
+          <div><dt>Null handling</dt><dd>UDFs receive <code>None</code> for nulls — guard against it or you'll get runtime errors.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 08</span><span>Integer UDF</span></div>
+        <pre class="code" data-lang="python"><span class="c"># UDF that returns an integer</span>
+<span class="k">def</span> <span class="f">double_salary</span>(salary):
+    <span class="k">return</span> <span class="k">int</span>(salary * <span class="n">2</span>) <span class="k">if</span> salary <span class="k">is not</span> <span class="k">None</span> <span class="k">else</span> <span class="k">None</span>
+
+double_udf = <span class="f">udf</span>(double_salary, <span class="cls">IntegerType</span>())
+df.<span class="f">withColumn</span>(<span class="s">"doubled"</span>, <span class="f">double_udf</span>(df.salary)).<span class="f">show</span>()</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Performance</div>
+          <p>Standard UDFs serialize data between the JVM and Python <em>row by row</em> — this is slow. Use built-in functions whenever possible. When you must use custom logic, prefer <em>Pandas UDFs</em> (next section) for vectorized performance.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — when you actually need a UDF</div>
+          <p>You need to validate IDs against a custom checksum algorithm your company uses (e.g., Luhn check on account numbers). No built-in function exists. Write the validation as a UDF returning <code>BooleanType()</code>, apply it, then filter: <code>df.filter(validate_udf(col("account_id")))</code>. This is one of the few cases where a standard UDF is justified.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>Before writing a UDF, check <code>pyspark.sql.functions</code> — there are 200+ built-in functions covering math, string, date, regex, array, map, and JSON operations. Nine times out of ten, what you need already exists and runs 10–50× faster than a UDF.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 19 ====== -->
+    <section id="s22" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 22</span>
+        </div>
+        <h2 class="topic-title">Pandas UDFs — <span class="accent-word">vectorized</span> performance</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Pandas UDFs (a.k.a. vectorized UDFs) operate on <em>batches</em> of rows as pandas Series instead of one-at-a-time. The payoff is dramatically faster execution.</p>
+
+        <pre class="code" data-lang="python"><span class="k">import</span> pandas <span class="k">as</span> pd
+<span class="k">from</span> pyspark.sql.functions <span class="k">import</span> pandas_udf
+<span class="k">from</span> pyspark.sql.types <span class="k">import</span> <span class="cls">DoubleType</span>
+
+<span class="c"># decorator style — operates on a pandas Series, returns a pandas Series</span>
+@<span class="f">pandas_udf</span>(<span class="cls">DoubleType</span>())
+<span class="k">def</span> <span class="f">salary_to_eur</span>(salary: pd.<span class="cls">Series</span>) -> pd.<span class="cls">Series</span>:
+    <span class="k">return</span> salary * <span class="n">0.92</span>
+
+<span class="c"># apply like any column function</span>
+df.<span class="f">withColumn</span>(<span class="s">"salary_eur"</span>, <span class="f">salary_to_eur</span>(df.salary_usd)).<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>@pandas_udf(type)</dt><dd>Decorator that marks a function as vectorized. Input and output are pandas Series.</dd></div>
+          <div><dt>Arrow-backed</dt><dd>Uses Apache Arrow for zero-copy transfer between JVM and Python — much faster than row-by-row serialization.</dd></div>
+          <div><dt>Batch operation</dt><dd>Spark sends chunks of rows. The function processes them with pandas/NumPy vectorized ops.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">UDF vs Pandas UDF</div>
+          <p>Regular UDF: <em>one row at a time</em> → Python overhead per row → slow at scale. Pandas UDF: <em>batch of rows</em> → vectorized NumPy/pandas ops → 10–100× faster. Always prefer Pandas UDFs when your logic can be expressed as Series operations.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">Type hint</div>
+          <p>The type hints (<code>pd.Series -> pd.Series</code>) aren't just documentation — PySpark uses them to determine the UDF variant. Omitting them can cause confusing runtime errors.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--     PART 05 — PYSPARK SQL & RDDS               -->
+    <!-- ============================================== -->
+    <div class="part-banner">
+      <span class="dot"></span>
+      <span class="name">Part 05 &nbsp;·&nbsp; PySpark SQL &amp; RDDs</span>
+      <span class="line"></span>
+    </div>
+
+    <!-- ====== 20 ====== -->
+    <section id="s23" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 23</span>
+        </div>
+        <h2 class="topic-title">Resilient Distributed Datasets (<span class="accent-word">RDDs</span>)</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">RDDs are Spark's <em>lowest-level</em> abstraction — an immutable, distributed collection of objects. DataFrames are built on top of them. You rarely use RDDs directly, but understanding them matters.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># create an RDD from a Python list</span>
+rdd = spark.sparkContext.<span class="f">parallelize</span>([<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>, <span class="n">4</span>, <span class="n">5</span>])
+
+<span class="c"># create from a text file</span>
+rdd_text = spark.sparkContext.<span class="f">textFile</span>(<span class="s">"data.txt"</span>)
+
+<span class="c"># collect — pulls all data back to the driver</span>
+rdd.<span class="f">collect</span>()   <span class="c"># → [1, 2, 3, 4, 5]</span>
+
+<span class="c"># take — returns only the first n elements</span>
+rdd.<span class="f">take</span>(<span class="n">3</span>)      <span class="c"># → [1, 2, 3]</span></pre>
+
+        <dl class="defgrid">
+          <div><dt>RDD</dt><dd>Resilient Distributed Dataset — Spark's foundational data structure. Immutable, partitioned across nodes.</dd></div>
+          <div><dt>.parallelize(list)</dt><dd>Creates an RDD from a local Python collection, distributing it across the cluster.</dd></div>
+          <div><dt>.textFile(path)</dt><dd>Reads a text file into an RDD where each line is one element.</dd></div>
+          <div><dt>.collect()</dt><dd>Action — returns the entire RDD to the driver as a Python list. Careful with large datasets — can OOM.</dd></div>
+          <div><dt>.take(n)</dt><dd>Safe alternative — returns just the first <code>n</code> elements without pulling everything.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">RDD vs DataFrame</div>
+          <p>DataFrames know about <em>columns and types</em> — Spark can optimize their query plans (Catalyst optimizer). RDDs are unstructured — Spark treats them as opaque objects and can't optimize. For analytics, always prefer DataFrames.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">When to use RDDs</div>
+          <p>Low-level transformations that don't fit the DataFrame model, processing unstructured text data, or when you need fine-grained control over partitioning. Otherwise, stick with DataFrames.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — when RDDs still matter</div>
+          <p>You're ingesting raw log files where each line is a semi-structured string that doesn't parse cleanly into columns. Use <code>sc.textFile()</code> → <code>.map()</code> with a custom parser → <code>.filter()</code> malformed lines → convert to DataFrame once the data is clean. RDDs are the right tool for the "messy text → structured table" bridge.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p><code>.collect()</code> pulls <em>everything</em> to the driver's memory. On a 50 GB RDD, this will crash your driver node. Use <code>.take(n)</code> for inspection and <code>.foreach()</code> or <code>.saveAsTextFile()</code> for output. In interviews, mentioning this shows you understand the driver vs. executor distinction.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 21 ====== -->
+    <section id="s24" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 24</span>
+        </div>
+        <h2 class="topic-title">Spark SQL — <span class="accent-word">query DataFrames with SQL</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Register a DataFrame as a temporary view, then query it with plain SQL. The best of both worlds — Python for orchestration, SQL for analytics.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># register a DataFrame as a temp view</span>
+df.<span class="f">createOrReplaceTempView</span>(<span class="s">"employees"</span>)
+
+<span class="c"># now query it with SQL</span>
+result = spark.<span class="f">sql</span>(<span class="s">"""
+    SELECT department, AVG(salary) AS avg_salary
+    FROM employees
+    WHERE age > 30
+    GROUP BY department
+    ORDER BY avg_salary DESC
+"""</span>)
+result.<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>.createOrReplaceTempView(name)</dt><dd>Registers the DataFrame as a named SQL table scoped to this SparkSession. Idempotent — safe to call repeatedly.</dd></div>
+          <div><dt>spark.sql(query)</dt><dd>Executes a SQL string and returns the result as a DataFrame. Supports full Spark SQL syntax.</dd></div>
+          <div><dt>Temp view scope</dt><dd>Exists only within the current SparkSession. Use <code>createGlobalTempView</code> to share across sessions.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 09</span><span>Query on a temp view</span></div>
+        <pre class="code" data-lang="python"><span class="c"># register</span>
+flights_df.<span class="f">createOrReplaceTempView</span>(<span class="s">"flights"</span>)
+
+<span class="c"># query — all familiar SQL</span>
+long_flights = spark.<span class="f">sql</span>(<span class="s">"""
+    SELECT origin, dest, air_time
+    FROM flights
+    WHERE air_time > 300
+    ORDER BY air_time DESC
+"""</span>)
+long_flights.<span class="f">show</span>(<span class="n">10</span>)</pre>
+
+        <div class="callout accent">
+          <div class="cal-label">Best of both</div>
+          <p>This is the <em>hybrid pattern</em> — use Python/PySpark for loading, cleaning, and orchestration; switch to SQL for complex analytical queries where SQL syntax is more natural. Both produce the same optimized execution plan under the hood.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — migration from data warehouse</div>
+          <p>Your team has 200 existing SQL queries in Snowflake. Instead of rewriting each in the DataFrame API, register your DataFrames as temp views and run the SQL as-is via <code>spark.sql()</code>. Migrate the orchestration to Python (scheduling, error handling, alerts) while keeping the SQL logic identical. This cuts migration time by 80%.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>Use f-strings to parameterize SQL queries: <code>spark.sql(f"SELECT * FROM orders WHERE order_date = '{run_date}'")</code>. For production, prefer <code>spark.sql()</code> with <code>.where()</code> chained after to inject dynamic filters safely — avoids SQL injection patterns in shared notebooks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 22 ====== -->
+    <section id="s25" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 25</span>
+        </div>
+        <h2 class="topic-title">Analytics with SQL on DataFrames</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Once you can write SQL against DataFrames, the full toolkit opens up — window functions, subqueries, CTEs, and complex multi-table analytics.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># analytics — multiple aggregations in one SQL query</span>
+spark.<span class="f">sql</span>(<span class="s">"""
+    SELECT 
+        department,
+        COUNT(*) AS headcount,
+        ROUND(AVG(salary), 2) AS avg_salary,
+        MAX(salary) AS max_salary,
+        MIN(salary) AS min_salary
+    FROM employees
+    GROUP BY department
+    HAVING COUNT(*) > 5
+    ORDER BY avg_salary DESC
+"""</span>).<span class="f">show</span>()
+
+<span class="c"># window function example — rank within department</span>
+spark.<span class="f">sql</span>(<span class="s">"""
+    SELECT name, department, salary,
+           RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rank
+    FROM employees
+"""</span>).<span class="f">show</span>()</pre>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>This is literally the same SQL you'd write in Snowflake or Databricks SQL. The only difference is you're running it via <code>spark.sql()</code> instead of a SQL worksheet. Same optimizer, same semantics.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">Mixing approaches</div>
+          <p>The DataFrame returned by <code>spark.sql()</code> is a normal PySpark DataFrame — you can chain <code>.filter()</code>, <code>.withColumn()</code>, or <code>.write</code> on it. SQL and the DataFrame API are fully interoperable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 23 ====== -->
+    <section id="s26" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 26</span>
+        </div>
+        <h2 class="topic-title">PySpark <span class="accent-word">aggregations</span> — deep dive</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Beyond the basic <code>.agg()</code> — multiple aggregation functions, named outputs, and complex grouped computations.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> (
+    col, count, avg, sum, min, max, round <span class="k">as</span> spark_round
+)
+
+<span class="c"># multiple aggregations in one call</span>
+df.<span class="f">groupBy</span>(<span class="s">"department"</span>).<span class="f">agg</span>(
+    <span class="f">count</span>(<span class="s">"*"</span>).<span class="f">alias</span>(<span class="s">"headcount"</span>),
+    <span class="f">spark_round</span>(<span class="f">avg</span>(<span class="s">"salary"</span>), <span class="n">2</span>).<span class="f">alias</span>(<span class="s">"avg_salary"</span>),
+    <span class="f">max</span>(<span class="s">"salary"</span>).<span class="f">alias</span>(<span class="s">"top_salary"</span>),
+    <span class="f">min</span>(<span class="s">"salary"</span>).<span class="f">alias</span>(<span class="s">"low_salary"</span>),
+).<span class="f">orderBy</span>(<span class="s">"avg_salary"</span>, ascending=<span class="k">False</span>).<span class="f">show</span>()
+
+<span class="c"># no groupBy — aggregate the entire DataFrame</span>
+df.<span class="f">agg</span>(
+    <span class="f">count</span>(<span class="s">"*"</span>).<span class="f">alias</span>(<span class="s">"total_rows"</span>),
+    <span class="f">avg</span>(<span class="s">"salary"</span>).<span class="f">alias</span>(<span class="s">"global_avg"</span>),
+).<span class="f">show</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>.alias(name)</dt><dd>Renames the aggregation output column — like <code>AS</code> in SQL.</dd></div>
+          <div><dt>Function imports</dt><dd>Use <code>pyspark.sql.functions</code> for <code>count</code>, <code>avg</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>stddev</code>, <code>collect_list</code>, etc.</dd></div>
+          <div><dt>Dict vs function style</dt><dd><code>.agg({"col": "avg"})</code> is quick but limited. Function style (<code>.agg(avg("col").alias("name"))</code>) is more flexible.</dd></div>
+        </dl>
+
+        <div class="callout accent">
+          <div class="cal-label">Pro tip</div>
+          <p>Watch the import name collision — Python's built-in <code>round</code>, <code>sum</code>, <code>min</code>, <code>max</code> conflict with PySpark's. Either import with an alias (<code>from pyspark.sql.functions import round as spark_round</code>) or use <code>F.round()</code> via <code>import pyspark.sql.functions as F</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 27 — NEW ====== -->
+    <section id="s27" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 27</span>
+        </div>
+        <h2 class="topic-title">Complex <span class="accent-word">aggregations</span> — pivot, rollup, cube</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">Beyond <code>groupBy().agg()</code> — <em>pivot</em> turns row values into columns, <em>rollup</em> adds subtotals, and <em>cube</em> gives you every possible grouping combination.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> sum, avg, count, collect_list
+
+<span class="c"># PIVOT — turn row values into columns</span>
+<span class="c"># like a spreadsheet crosstab</span>
+pivot_df = df.<span class="f">groupBy</span>(<span class="s">"department"</span>) \
+    .<span class="f">pivot</span>(<span class="s">"quarter"</span>, [<span class="s">"Q1"</span>, <span class="s">"Q2"</span>, <span class="s">"Q3"</span>, <span class="s">"Q4"</span>]) \
+    .<span class="f">agg</span>(<span class="f">sum</span>(<span class="s">"revenue"</span>))
+pivot_df.<span class="f">show</span>()
+<span class="c"># → department | Q1    | Q2    | Q3    | Q4</span>
+<span class="c"># → Sales      | 50000 | 62000 | 58000 | 71000</span>
+
+<span class="c"># ROLLUP — subtotals at each group level + grand total</span>
+df.<span class="f">rollup</span>(<span class="s">"department"</span>, <span class="s">"role"</span>) \
+    .<span class="f">agg</span>(<span class="f">sum</span>(<span class="s">"salary"</span>).<span class="f">alias</span>(<span class="s">"total_salary"</span>)) \
+    .<span class="f">orderBy</span>(<span class="s">"department"</span>, <span class="s">"role"</span>).<span class="f">show</span>()
+<span class="c"># → rows with nulls = subtotal/grand-total rows</span>
+
+<span class="c"># CUBE — all possible grouping combinations</span>
+df.<span class="f">cube</span>(<span class="s">"department"</span>, <span class="s">"location"</span>) \
+    .<span class="f">agg</span>(<span class="f">count</span>(<span class="s">"*"</span>).<span class="f">alias</span>(<span class="s">"headcount"</span>)) \
+    .<span class="f">show</span>()
+
+<span class="c"># collect_list — aggregate into an array</span>
+df.<span class="f">groupBy</span>(<span class="s">"department"</span>).<span class="f">agg</span>(
+    <span class="f">collect_list</span>(<span class="s">"name"</span>).<span class="f">alias</span>(<span class="s">"members"</span>)
+).<span class="f">show</span>(truncate=<span class="k">False</span>)</pre>
+
+        <dl class="defgrid">
+          <div><dt>.pivot(col, values)</dt><dd>Rotates distinct values of a column into separate columns. Always pass the values list explicitly for performance.</dd></div>
+          <div><dt>.rollup(cols)</dt><dd>Like <code>groupBy</code> but adds hierarchical subtotals. Nulls in group columns indicate subtotal rows.</dd></div>
+          <div><dt>.cube(cols)</dt><dd>Like <code>rollup</code> but generates every combination of grouping columns — the full multi-dimensional summary.</dd></div>
+          <div><dt>collect_list(col)</dt><dd>Collects all values per group into an array. Use <code>collect_set</code> for unique values only.</dd></div>
+        </dl>
+
+        <div class="eg-label"><span class="eg-num">Ex 10</span><span>Revenue pivot table</span></div>
+        <pre class="code" data-lang="python"><span class="c"># build a pivot: revenue by region × product category</span>
+report = sales_df \
+    .<span class="f">groupBy</span>(<span class="s">"region"</span>) \
+    .<span class="f">pivot</span>(<span class="s">"category"</span>, [<span class="s">"Electronics"</span>, <span class="s">"Clothing"</span>, <span class="s">"Food"</span>]) \
+    .<span class="f">agg</span>(<span class="f">sum</span>(<span class="s">"revenue"</span>).<span class="f">alias</span>(<span class="s">"total"</span>))
+
+report.<span class="f">na</span>.<span class="f">fill</span>(<span class="n">0</span>).<span class="f">show</span>()</pre>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — executive reporting</div>
+          <p>Finance asks for a summary: total salary spend by department, with subtotals per department and a grand total. <code>.rollup("department", "role").agg(sum("salary"))</code> gives you all three levels in one query — no manual <code>UNION ALL</code> with a totals row.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p>Pivot <em>without</em> specifying the values list forces Spark to do a pre-scan of all distinct values — an extra full pass over the data. Always pass <code>.pivot("col", ["A", "B", "C"])</code> explicitly. In Databricks notebooks, <code>df.select("col").distinct().show()</code> first, then hardcode the list.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>Use <code>collect_list</code> + <code>explode</code> as a pair — <code>collect_list</code> groups into arrays, <code>explode</code> flattens arrays back into rows. Together they enable sessionization, basket analysis, and time-window aggregations that are awkward with pure SQL.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 28 ====== -->
+    <section id="s28" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 28</span>
+        </div>
+        <h2 class="topic-title">Aggregations in RDDs</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">RDDs aggregate differently — using functional primitives like <code>map</code>, <code>reduce</code>, <code>reduceByKey</code>, and <code>countByKey</code> instead of SQL-style group-by.</p>
+
+        <pre class="code" data-lang="python"><span class="c"># setup — RDD of (key, value) pairs</span>
+rdd = spark.sparkContext.<span class="f">parallelize</span>([
+    (<span class="s">"engineering"</span>, <span class="n">95000</span>),
+    (<span class="s">"marketing"</span>,   <span class="n">72000</span>),
+    (<span class="s">"engineering"</span>, <span class="n">110000</span>),
+    (<span class="s">"marketing"</span>,   <span class="n">68000</span>),
+    (<span class="s">"engineering"</span>, <span class="n">88000</span>),
+])
+
+<span class="c"># reduce — single aggregate over all values</span>
+total = rdd.<span class="f">map</span>(<span class="k">lambda</span> x: x[<span class="n">1</span>]).<span class="f">reduce</span>(<span class="k">lambda</span> a, b: a + b)
+<span class="c"># → 433000</span>
+
+<span class="c"># reduceByKey — aggregate per key (like GROUP BY + SUM)</span>
+totals_by_dept = rdd.<span class="f">reduceByKey</span>(<span class="k">lambda</span> a, b: a + b)
+totals_by_dept.<span class="f">collect</span>()
+<span class="c"># → [('engineering', 293000), ('marketing', 140000)]</span>
+
+<span class="c"># countByKey — count per key</span>
+rdd.<span class="f">countByKey</span>()
+<span class="c"># → {'engineering': 3, 'marketing': 2}</span></pre>
+
+        <dl class="defgrid">
+          <div><dt>.map(fn)</dt><dd>Transformation — applies a function to each element, returns a new RDD.</dd></div>
+          <div><dt>.reduce(fn)</dt><dd>Action — combines all elements using a binary function. Returns a single value to the driver.</dd></div>
+          <div><dt>.reduceByKey(fn)</dt><dd>Groups by key and applies the reduce function within each group. Stays distributed.</dd></div>
+          <div><dt>.countByKey()</dt><dd>Action — counts occurrences per key. Returns a Python dict to the driver.</dd></div>
+        </dl>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p><code>rdd.reduceByKey(lambda a, b: a + b)</code> is the RDD equivalent of <code>SELECT dept, SUM(salary) FROM t GROUP BY dept</code>. Same result, more manual wiring — which is why DataFrames are preferred.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 25 ====== -->
+    <section id="s29" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 29</span>
+        </div>
+        <h2 class="topic-title"><span class="accent-word">Broadcast</span> variables &amp; optimization</h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">When a small dataset is used by every worker — like a lookup table — <em>broadcasting</em> it sends one copy to each node instead of shuffling it with every task.</p>
+
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql.functions <span class="k">import</span> broadcast
+
+<span class="c"># broadcast the smaller DataFrame in a join</span>
+result = large_df.<span class="f">join</span>(
+    <span class="f">broadcast</span>(small_lookup_df),
+    <span class="s">"key_column"</span>
+)
+result.<span class="f">show</span>()
+
+<span class="c"># RDD-level broadcast variable</span>
+lookup = {<span class="s">"US"</span>: <span class="s">"United States"</span>, <span class="s">"IN"</span>: <span class="s">"India"</span>, <span class="s">"DE"</span>: <span class="s">"Germany"</span>}
+bc_lookup = spark.sparkContext.<span class="f">broadcast</span>(lookup)
+
+<span class="c"># use inside an RDD transformation</span>
+rdd.<span class="f">map</span>(<span class="k">lambda</span> row: (row, bc_lookup.value.<span class="f">get</span>(row, <span class="s">"Unknown"</span>))).<span class="f">collect</span>()</pre>
+
+        <dl class="defgrid">
+          <div><dt>broadcast(df)</dt><dd>Hints Spark to send the small DataFrame to all nodes before the join — avoids expensive shuffles.</dd></div>
+          <div><dt>sc.broadcast(obj)</dt><dd>RDD-level — broadcasts a Python object (dict, list) to every worker. Access via <code>.value</code>.</dd></div>
+          <div><dt>When to use</dt><dd>One side of a join is small (< ~100 MB). Lookup tables, config maps, dimension tables.</dd></div>
+          <div><dt>Avoid when</dt><dd>Both sides are large — broadcasting a big table wastes memory on every node.</dd></div>
+        </dl>
+
+        <div class="callout accent">
+          <div class="cal-label">Performance impact</div>
+          <p>Without broadcast: Spark <em>shuffles</em> both datasets across the network to co-locate matching keys — expensive. With broadcast: the small table is sent once, and the large table stays in place. For a 10 GB ⋈ 50 MB join, this can be the difference between minutes and seconds.</p>
+        </div>
+
+        <div class="callout">
+          <div class="cal-label">SQL bridge</div>
+          <p>In Databricks SQL, this maps to the <code>/*+ BROADCAST(small_table) */</code> hint. Spark often auto-broadcasts tables under 10 MB (configurable via <code>spark.sql.autoBroadcastJoinThreshold</code>), but being explicit is safer for important jobs.</p>
+        </div>
+
+        <div class="callout hardpoint">
+          <div class="cal-label">Hard point</div>
+          <p>Broadcasting a table that's <em>too large</em> (> 500 MB) will cause the driver to OOM — it has to collect and serialize the entire table before sending it to workers. If you're not sure, check: <code>spark.sql("SELECT COUNT(*), SUM(size) FROM table").show()</code> or look at the DataFrame size in the Spark UI's Storage tab.</p>
+        </div>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip</div>
+          <p>For RDD-level broadcast variables, remember to call <code>bc_var.unpersist()</code> when you're done — broadcast variables stay in memory on every executor until explicitly cleared. In long-running streaming jobs or notebooks with many cells, this prevents memory leaks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 30 — NEW ====== -->
+    <section id="s30" class="topic">
+      <div class="topic-head">
+        <div class="topic-kicker">
+          <span class="topic-num">§ 30</span>
+        </div>
+        <h2 class="topic-title">Bringing it all together — <span class="accent-word">end-to-end pipeline</span></h2>
+      </div>
+      <div class="topic-body">
+        <p class="lead">A realistic pipeline that ties together everything: read raw data, clean it, join with a lookup, aggregate, and write the result — using best practices from every section.</p>
+
+        <div class="eg-label"><span class="eg-num">Ex 11</span><span>Full pipeline — flight delay analysis</span></div>
+        <pre class="code" data-lang="python"><span class="k">from</span> pyspark.sql <span class="k">import</span> <span class="cls">SparkSession</span>
+<span class="k">from</span> pyspark.sql.functions <span class="k">import</span> (
+    col, avg, count, when, broadcast, round <span class="k">as</span> spark_round
+)
+<span class="k">from</span> pyspark.sql.types <span class="k">import</span> (
+    <span class="cls">StructType</span>, <span class="cls">StructField</span>, <span class="cls">StringType</span>, <span class="cls">IntegerType</span>, <span class="cls">DoubleType</span>
+)
+
+<span class="c"># 1 — SESSION</span>
+spark = <span class="cls">SparkSession</span>.builder.<span class="f">appName</span>(<span class="s">"FlightDelays"</span>).<span class="f">getOrCreate</span>()
+
+<span class="c"># 2 — READ with explicit schema (skip inferSchema for speed)</span>
+flight_schema = <span class="cls">StructType</span>([
+    <span class="cls">StructField</span>(<span class="s">"flight_id"</span>,   <span class="cls">IntegerType</span>(), <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"origin"</span>,      <span class="cls">StringType</span>(),  <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"dest"</span>,        <span class="cls">StringType</span>(),  <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"delay_min"</span>,   <span class="cls">DoubleType</span>(),  <span class="k">True</span>),
+    <span class="cls">StructField</span>(<span class="s">"air_time"</span>,    <span class="cls">DoubleType</span>(),  <span class="k">True</span>),
+])
+flights = spark.read.<span class="f">csv</span>(<span class="s">"flights.csv"</span>, header=<span class="k">True</span>, schema=flight_schema)
+
+airports = spark.read.<span class="f">parquet</span>(<span class="s">"airports.parquet"</span>)  <span class="c"># small lookup</span>
+
+<span class="c"># 3 — CLEAN: drop nulls in critical columns, fill others</span>
+flights_clean = (
+    flights
+    .<span class="f">na</span>.<span class="f">drop</span>(subset=[<span class="s">"origin"</span>, <span class="s">"dest"</span>])
+    .<span class="f">na</span>.<span class="f">fill</span>({<span class="s">"delay_min"</span>: <span class="n">0.0</span>})
+    .<span class="f">withColumn</span>(<span class="s">"is_delayed"</span>,
+        <span class="f">when</span>(col(<span class="s">"delay_min"</span>) > <span class="n">15</span>, <span class="k">True</span>).<span class="f">otherwise</span>(<span class="k">False</span>)
+    )
+)
+
+<span class="c"># 4 — JOIN with broadcast (airports is small)</span>
+enriched = flights_clean.<span class="f">join</span>(
+    <span class="f">broadcast</span>(airports),
+    flights_clean.dest == airports.faa,
+    <span class="s">"left"</span>
+)
+
+<span class="c"># 5 — AGGREGATE: delay stats per destination city</span>
+report = (
+    enriched
+    .<span class="f">groupBy</span>(<span class="s">"city"</span>, <span class="s">"state"</span>)
+    .<span class="f">agg</span>(
+        <span class="f">count</span>(<span class="s">"*"</span>).<span class="f">alias</span>(<span class="s">"total_flights"</span>),
+        <span class="f">spark_round</span>(<span class="f">avg</span>(<span class="s">"delay_min"</span>), <span class="n">1</span>).<span class="f">alias</span>(<span class="s">"avg_delay"</span>),
+        <span class="f">count</span>(<span class="f">when</span>(col(<span class="s">"is_delayed"</span>), <span class="k">True</span>)).<span class="f">alias</span>(<span class="s">"delayed_count"</span>),
+    )
+    .<span class="f">withColumn</span>(<span class="s">"delay_pct"</span>,
+        <span class="f">spark_round</span>(col(<span class="s">"delayed_count"</span>) / col(<span class="s">"total_flights"</span>) * <span class="n">100</span>, <span class="n">1</span>)
+    )
+    .<span class="f">orderBy</span>(col(<span class="s">"avg_delay"</span>).<span class="f">desc</span>())
+)
+
+<span class="c"># 6 — WRITE to Delta (or Parquet)</span>
+report.<span class="f">write</span>.<span class="f">mode</span>(<span class="s">"overwrite"</span>).<span class="f">parquet</span>(<span class="s">"output/delay_report"</span>)
+
+<span class="c"># quick preview</span>
+report.<span class="f">show</span>(<span class="n">10</span>)</pre>
+
+        <ul class="points">
+          <li><span class="tag accent">§ 04</span><span>SparkSession — entry point to the cluster.</span></li>
+          <li><span class="tag accent">§ 13</span><span>Explicit schema — faster, deterministic reads.</span></li>
+          <li><span class="tag accent">§ 16</span><span>na.drop + na.fill — clean missing data.</span></li>
+          <li><span class="tag accent">§ 18</span><span>when/otherwise — conditional columns.</span></li>
+          <li><span class="tag accent">§ 29</span><span>broadcast — optimize the small-table join.</span></li>
+          <li><span class="tag accent">§ 26</span><span>groupBy + agg with named outputs.</span></li>
+        </ul>
+
+        <div class="callout tip">
+          <div class="cal-label">Pro tip — production checklist</div>
+          <p>Before promoting any pipeline: (1) <code>.explain(True)</code> to verify broadcast join was used, (2) check partition count on the output, (3) add a <code>.count()</code> assertion on the input and output for data quality, (4) parameterize paths and dates so the same notebook runs for any day.</p>
+        </div>
+
+        <div class="callout scenario">
+          <div class="cal-label">Scenario — Databricks production</div>
+          <p>In a Databricks job, replace <code>.write.parquet()</code> with <code>.write.format("delta").mode("merge").saveAsTable("gold.delay_report")</code> to get ACID transactions, time travel, and schema enforcement for free. The pipeline logic stays identical — only the sink changes.</p>
+        </div>
+
+        <div class="callout accent">
+          <div class="cal-label">What's next</div>
+          <p>This reference covers the core PySpark toolkit. From here, branch into <em>Spark Structured Streaming</em> for real-time, <em>MLlib</em> for distributed ML, <em>Delta Lake</em> for reliable data lakes, and <em>Spark UI profiling</em> to optimize production workloads.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="closer">
+    <div class="footer-mark">✦</div>
+    <div class="footer-title">The PySpark Field Guide</div>
+    <div class="footer-sub">30 sections · 5 parts · Foundations → DataFrames → SQL → RDDs → Pipelines</div>
+    <div class="footer-sub" style="margin-top: -12px;">By <strong style="color: var(--ink-main);">Abhishek Raj</strong> · <a href="mailto:pr.abhishekraj@gmail.com" style="color: var(--accent); text-decoration: none;">pr.abhishekraj@gmail.com</a></div>
+    <div class="footer-links">
+      <a href="#s1">Back to top</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
